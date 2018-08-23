@@ -35,8 +35,7 @@ func (c *Config) SetPrefix(prefix string) {
 	c.Prefix = prefix
 }
 
-// DescribeString describes a string parameter
-func (c *Config) DescribeString(name string, description string, mandatory bool, defaultValue string) {
+func (c *Config) describe(name string, description string, mandatory bool, defaultValue string) {
 	if c.Parameters == nil {
 		c.Parameters = make(map[string]Parameter)
 	}
@@ -49,18 +48,38 @@ func (c *Config) DescribeString(name string, description string, mandatory bool,
 	}
 }
 
-// DescribeInt describes an integer parameter
-func (c *Config) DescribeInt(name string, description string, mandatory bool, defaultValue int) {
-	c.DescribeString(name, description, mandatory, strconv.Itoa(defaultValue))
+// DescribeMandatoryString describes a mandatory string parameter
+func (c *Config) DescribeMandatoryString(name string, description string) {
+	c.describe(name, description, true, "")
 }
 
-// DescribeBool describes a boolean parameter
-func (c *Config) DescribeBool(name string, description string, mandatory bool, defaultValue bool) {
+// DescribeOptionalString describes an optional string parameter with a default value
+func (c *Config) DescribeOptionalString(name string, description string, defaultValue string) {
+	c.describe(name, description, false, defaultValue)
+}
+
+// DescribeMandatoryInt describes a mandatory integer parameter
+func (c *Config) DescribeMandatoryInt(name string, description string) {
+	c.describe(name, description, true, "")
+}
+
+// DescribeOptionalInt describes an optional integer parameter with a default value
+func (c *Config) DescribeOptionalInt(name string, description string, defaultValue int) {
+	c.describe(name, description, false, strconv.Itoa(defaultValue))
+}
+
+// DescribeMandatoryBool describes a mandatory boolean parameter
+func (c *Config) DescribeMandatoryBool(name string, description string) {
+	c.describe(name, description, true, "")
+}
+
+// DescribeOptionalBool describes an optional boolean parameter with a default value
+func (c *Config) DescribeOptionalBool(name string, description string, defaultValue bool) {
 	stringDefaultValue := "false"
 	if defaultValue {
 		stringDefaultValue = "true"
 	}
-	c.DescribeString(name, description, mandatory, stringDefaultValue)
+	c.describe(name, description, false, stringDefaultValue)
 }
 
 // PrintUsage prints the usage information
@@ -97,7 +116,7 @@ func (c *Config) Parse() {
 		if parameter.Mandatory {
 			result := os.Getenv(c.Prefix + parameter.Name)
 			if result == "" {
-				fmt.Printf("Error: Mandatory environment variable %s not set!\n", parameter.Name)
+				fmt.Printf("Error: Mandatory environment variable %s not set!\n", c.Prefix+parameter.Name)
 				failed = true
 			}
 		}

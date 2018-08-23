@@ -6,14 +6,23 @@ import "github.com/Blockdaemon/config"
 func main() {
 	config := new(config.Config)
 	config.SetPrefix("EXAMPLE_")
-	config.DescribeInt("PORT", "The port to listen to", false, 1234)
-	config.DescribeString("HOST", "The host to listen to", false, "0.0.0.0")
-	config.DescribeBool("DEBUG", "Start in debug mode", false, true)
+
+	config.DescribeOptionalInt("PORT", "The port to listen to", 1234)
+	config.DescribeOptionalString("HOST", "The host to listen to", "0.0.0.0")
+	config.DescribeOptionalBool("DEBUG", "Start in debug mode", false)
+
+	config.DescribeMandatoryInt("PEERS", "The amount of peers to connect to")
+	config.DescribeMandatoryString("ID", "A unique id for this app")
+	config.DescribeMandatoryBool("ACCEPT", "Accept the terms and conditions")
+
 	config.Parse()
 
-	host := config.GetString("HOST")
 	port := config.GetInt("PORT")
+	host := config.GetString("HOST")
 	debug := config.GetBool("DEBUG")
+	peers := config.GetInt("PEERS")
+	id := config.GetString("ID")
+	accept := config.GetBool("ACCEPT")
 
-	fmt.Printf("Host: %s, Port: %d, Debug: %t\n", host, port, debug)
+	fmt.Printf("Port: %d, Host: %s, Debug: %t, Peers: %d, Id: %s, Accept: %t\n", port, host, debug, peers, id, accept)
 }
