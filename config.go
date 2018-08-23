@@ -84,20 +84,23 @@ func (c *Config) DescribeOptionalBool(name string, description string, defaultVa
 
 // PrintUsage prints the usage information
 func (c *Config) PrintUsage() {
-	fmt.Println("\nUse the following environment variables:")
+	fmt.Println("Set the following mandatory environment variables:")
+	fmt.Println("")
 
 	for _, parameter := range c.Parameters {
-		details := ""
 		if parameter.Mandatory {
-			details += "Mandatory"
-		} else {
-			details += "Optional"
+			fmt.Printf("   %-20s %s\n", c.Prefix+parameter.Name, parameter.Description)
 		}
-		if parameter.DefaultValue != "" {
-			details += ", Default: " + parameter.DefaultValue
-		}
+	}
 
-		fmt.Println("  " + c.Prefix + parameter.Name + " - " + parameter.Description + " (" + details + ")")
+	fmt.Println("")
+
+	fmt.Println("Set the following optional environment variables to overwrite the default values")
+	fmt.Println("")
+	for _, parameter := range c.Parameters {
+		if !parameter.Mandatory {
+			fmt.Printf("   %-20s %s (Default: %s)\n", c.Prefix+parameter.Name, parameter.Description, parameter.DefaultValue)
+		}
 	}
 }
 
@@ -123,6 +126,7 @@ func (c *Config) Parse() {
 	}
 
 	if failed {
+		fmt.Println("")
 		c.PrintUsage()
 		os.Exit(-1)
 	}
