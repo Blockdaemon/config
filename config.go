@@ -19,6 +19,20 @@ type Parameter struct {
 // Config describes multiple configuration parameters
 type Config struct {
 	Parameters map[string]Parameter
+	Prefix     string
+}
+
+// SetPrefix sets a prefix for all environment variables.
+//
+// Example that for the environment variable 'EXAMPLE_PORT':
+//     config.SetPrefix("EXAMPLE_")
+//     config.DescribeInt("PORT", "The port to listen to", false, 1234)
+//     port := config.GetInt("PORT")
+//
+// It makes sense to set the prefix to the application name to prevent
+// collisions with environment variables for other applications.
+func (c *Config) SetPrefix(prefix string) {
+	c.Prefix = prefix
 }
 
 // DescribeString describes a string parameter
@@ -64,7 +78,7 @@ func (c *Config) PrintUsage() {
 			details += ", Default: " + parameter.DefaultValue
 		}
 
-		fmt.Println("  " + parameter.Name + " - " + parameter.Description + " (" + details + ")")
+		fmt.Println("  " + c.Prefix + parameter.Name + " - " + parameter.Description + " (" + details + ")")
 	}
 }
 
@@ -81,7 +95,7 @@ func (c *Config) Parse() {
 	failed := false
 	for _, parameter := range c.Parameters {
 		if parameter.Mandatory {
-			result := os.Getenv(parameter.Name)
+			result := os.Getenv(c.Prefix + parameter.Name)
 			if result == "" {
 				fmt.Printf("Error: Mandatory environment variable %s not set!\n", parameter.Name)
 				failed = true
@@ -98,7 +112,7 @@ func (c *Config) Parse() {
 // GetString returns a string parameter
 func (c *Config) GetString(name string) string {
 	parameter := c.Parameters[name]
-	result := os.Getenv(name)
+	result := os.Getenv(c.Prefix + name)
 	if result == "" {
 		return parameter.DefaultValue
 	}
